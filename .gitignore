@@ -1,0 +1,12 @@
+# Executable files compiled by the Makefile
+jaineel
+gul
+
+# Intermediate object files
+*.o
+
+# Log files created during runtime
+*.log
+
+# Python cache files (for the gui folder)
+__pycache__/
