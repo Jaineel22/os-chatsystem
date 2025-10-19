@@ -15,7 +15,9 @@ int main() {
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
     
+    
     display_welcome(GUL_NAME, GUL_COLOR);
+
     log_system_event("Gul process started");
     
     // Get existing shared memory segment
