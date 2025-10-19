@@ -16,7 +16,8 @@ int main() {
     signal(SIGTERM, signal_handler);
     
     display_welcome(JAINEEL_NAME, JAINEEL_COLOR);
-    printf("%sWelcome to the OS Chat System!%s\n", SYSTEM_COLOR, COLOR_RESET); // <-- THIS IS THE NEW LINE
+    printf("%sWelcome to the OS Chat System!%s\n", SYSTEM_COLOR, COLOR_RESET);
+    printf("%s========================================%s\n", SYSTEM_COLOR, COLOR_RESET); // <-- THIS IS THE NEW LINE
     log_system_event("Jaineel process started");
     
     // Check and clean any existing resources
