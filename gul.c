@@ -17,8 +17,10 @@ int main() {
     
     
     display_welcome(GUL_NAME, GUL_COLOR);
-
+     printf("%sWelcome to the OS Chat System!%s\n", SYSTEM_COLOR, COLOR_RESET); // <-- THIS IS THE NEW LINE
+     printf("%sCompiled on: %s at %s%s\n", COLOR_DIM, __DATE__, __TIME__, COLOR_RESET); // <-- ADDED THIS LINE
     log_system_event("Gul process started");
+
     
     // Get existing shared memory segment
     shmid = shmget(SHM_KEY, sizeof(struct shmseg), 0666);
