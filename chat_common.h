@@ -1,4 +1,5 @@
 #define _DEFAULT_SOURCE
+#define VERSION "2.1"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
