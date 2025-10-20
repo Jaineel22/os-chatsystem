@@ -17,7 +17,7 @@ int main() {
     
     display_welcome(JAINEEL_NAME, JAINEEL_COLOR);
     printf("%sWelcome to the OS Chat System!%s\n", SYSTEM_COLOR, COLOR_RESET);
-    printf("%s========================================%s\n", SYSTEM_COLOR, COLOR_RESET); // <-- THIS IS THE NEW LINE
+    printf("%s========================================%s\n", SYSTEM_COLOR, COLOR_RESET);
     log_system_event("Jaineel process started");
     
     // Check and clean any existing resources
@@ -70,7 +70,7 @@ int main() {
         semctl(semid, 2, SETVAL, 1); // system semaphore = 1
     }
     
-    printf("%sChat ready! You can start typing messages.%s\n", SUCCESS_COLOR, COLOR_RESET);
+    printf("%sConnection established! You can now chat live.%s\n", SUCCESS_COLOR, COLOR_RESET); // <-- THIS LINE HAS BEEN CHANGED
     printf("%sType 'exit', 'bye', 'quit', or 'q' to leave.%s\n\n", SYSTEM_COLOR, COLOR_RESET);
     
     char input[MAX_MESSAGE_LEN];
