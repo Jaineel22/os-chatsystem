@@ -10,3 +10,16 @@ gul
 
 # Python cache files (for the gui folder)
 __pycache__/
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# Backup files
+*~
+*.bak
+
+# IDE files
+.vscode/
+.idea/
