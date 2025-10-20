@@ -2,6 +2,10 @@
 
 A sophisticated deadlock-free chat system that uses shared memory and semaphores for inter-process communication, designed to work like a modern messaging app.
 
+![Status](https://img.shields.io/badge/Status-Active-green)
+![Version](https://img.shields.io/badge/Version-2.1-blue)
+
+
 ## 🌟 Features
 
 - ✅ **Deadlock-Free**: Strict semaphore ordering prevents deadlocks
