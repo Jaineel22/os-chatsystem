@@ -1,9 +1,17 @@
 # 💬 Advanced Chat System v2.0
 
-A sophisticated deadlock-free chat system that uses shared memory and semaphores for inter-process communication, designed to work like a modern messaging app.
-
 ![Status](https://img.shields.io/badge/Status-Active-green)
 ![Version](https://img.shields.io/badge/Version-2.1-blue)
+
+A sophisticated deadlock-free chat system that uses shared memory and semaphores for inter-process communication, designed to work like a modern messaging app.
+
+## 📋 Table of Contents
+- [Features](#-features)
+- [Quick Start](#-quick-start)
+- [Architecture](#-architecture)
+- [Build](#-build-system)
+- [Technical Details](#-technical-details)
+- [Troubleshooting](#-troubleshooting)
 
 
 ## 🌟 Features
