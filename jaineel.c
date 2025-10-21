@@ -70,7 +70,7 @@ int main() {
          * semid[0] is the write semaphore. A process must wait on it before writing. (Starts at 1, unlocked)
          * semid[1] is the read semaphore. A process signals it after writing to notify the other. (Starts at 0, locked)
          * semid[2] is a general system semaphore for other critical sections.
-        */ // <-- THIS ENTIRE COMMENT BLOCK IS NEW
+        */
         semctl(semid, 0, SETVAL, 1); // write semaphore = 1
         semctl(semid, 1, SETVAL, 0); // read semaphore = 0
         semctl(semid, 2, SETVAL, 1); // system semaphore = 1
@@ -106,7 +106,7 @@ int main() {
         }
         
         // Get input from Jaineel
-        printf("%s%s: %s", JAINEEL_COLOR, JAINEEL_NAME, COLOR_RESET);
+        printf("%s%s > %s", JAINEEL_COLOR, JAINEEL_NAME, COLOR_RESET); // <-- THIS LINE HAS BEEN CHANGED
         fflush(stdout);
         
         if (fgets(input, MAX_MESSAGE_LEN, stdin) == NULL) {
