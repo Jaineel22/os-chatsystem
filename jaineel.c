@@ -106,7 +106,7 @@ int main() {
         }
         
         // Get input from Jaineel
-        printf("%s%s > %s", JAINEEL_COLOR, JAINEEL_NAME, COLOR_RESET); // <-- THIS LINE HAS BEEN CHANGED
+        printf("%s%s > %s", JAINEEL_COLOR, JAINEEL_NAME, COLOR_RESET);
         fflush(stdout);
         
         if (fgets(input, MAX_MESSAGE_LEN, stdin) == NULL) {
@@ -124,7 +124,11 @@ int main() {
             
             // Send exit message to Gul
             if (shm->message_count < 10) {
-                strcpy(shm->messages[shm->message_count].content, input);
+                // --- START OF CHANGES (BLOCK 1) ---
+                strncpy(shm->messages[shm->message_count].content, input, MAX_MESSAGE_LEN);
+                shm->messages[shm->message_count].content[MAX_MESSAGE_LEN - 1] = '\0'; // Ensure null-termination
+                // --- END OF CHANGES (BLOCK 1) ---
+                
                 strcpy(shm->messages[shm->message_count].sender, JAINEEL_NAME);
                 shm->messages[shm->message_count].type = MSG_TYPE_EXIT;
                 shm->messages[shm->message_count].message_id = ++shm->last_message_id;
@@ -137,7 +141,11 @@ int main() {
         
         // Send message to Gul
         if (shm->message_count < 10) {
-            strcpy(shm->messages[shm->message_count].content, input);
+            // --- START OF CHANGES (BLOCK 2) ---
+            strncpy(shm->messages[shm->message_count].content, input, MAX_MESSAGE_LEN);
+            shm->messages[shm->message_count].content[MAX_MESSAGE_LEN - 1] = '\0'; // Ensure null-termination
+            // --- END OF CHANGES (BLOCK 2) ---
+            
             strcpy(shm->messages[shm->message_count].sender, JAINEEL_NAME);
             shm->messages[shm->message_count].type = MSG_TYPE_NORMAL;
             shm->messages[shm->message_count].message_id = ++shm->last_message_id;
