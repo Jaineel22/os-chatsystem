@@ -124,12 +124,14 @@ int main() {
             
             // Send exit message to Gul
             if (shm->message_count < 10) {
-                // --- START OF CHANGES (BLOCK 1) ---
                 strncpy(shm->messages[shm->message_count].content, input, MAX_MESSAGE_LEN);
-                shm->messages[shm->message_count].content[MAX_MESSAGE_LEN - 1] = '\0'; // Ensure null-termination
+                shm->messages[shm->message_count].content[MAX_MESSAGE_LEN - 1] = '\0';
+                
+                // --- START OF CHANGES (BLOCK 1) ---
+                strncpy(shm->messages[shm->message_count].sender, JAINEEL_NAME, MAX_NAME_LEN);
+                shm->messages[shm->message_count].sender[MAX_NAME_LEN - 1] = '\0'; // Ensure null-termination
                 // --- END OF CHANGES (BLOCK 1) ---
                 
-                strcpy(shm->messages[shm->message_count].sender, JAINEEL_NAME);
                 shm->messages[shm->message_count].type = MSG_TYPE_EXIT;
                 shm->messages[shm->message_count].message_id = ++shm->last_message_id;
                 shm->message_count++;
@@ -141,12 +143,14 @@ int main() {
         
         // Send message to Gul
         if (shm->message_count < 10) {
-            // --- START OF CHANGES (BLOCK 2) ---
             strncpy(shm->messages[shm->message_count].content, input, MAX_MESSAGE_LEN);
-            shm->messages[shm->message_count].content[MAX_MESSAGE_LEN - 1] = '\0'; // Ensure null-termination
-            // --- END OF CHANGES (BLOCK 2) ---
+            shm->messages[shm->message_count].content[MAX_MESSAGE_LEN - 1] = '\0';
             
-            strcpy(shm->messages[shm->message_count].sender, JAINEEL_NAME);
+            // --- START OF CHANGES (BLOCK 2) ---
+            strncpy(shm->messages[shm->message_count].sender, JAINEEL_NAME, MAX_NAME_LEN);
+            shm->messages[shm->message_count].sender[MAX_NAME_LEN - 1] = '\0'; // Ensure null-termination
+            // --- END OF CHANGES (BLOCK 2) ---
+
             shm->messages[shm->message_count].type = MSG_TYPE_NORMAL;
             shm->messages[shm->message_count].message_id = ++shm->last_message_id;
             shm->message_count++;
