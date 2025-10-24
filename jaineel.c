@@ -132,30 +132,37 @@ int main(void) {
     char input[MAX_MESSAGE_LEN];
     int message_id = 0;
 
-    while (1) {
-        // <-- NEW COMMENT BLOCK START -->
+while (1) {
         /* * === CRITICAL SECTION START ===
          * Acquire the main mutex lock (semaphore 0).
          * This ensures only one process can read/write to shared memory at a time.
          */
-        // <-- NEW COMMENT BLOCK END -->
         sem_wait(semid, 0);
 
         /* Check new messages from Gul */
         if (shm->message_count > 0) {
             for (int i = 0; i < shm->message_count; i++) {
                 if (shm->messages[i].message_id > message_id) {
-                    display_message(GUL_NAME, shm->messages[i].content, GUL_COLOR, 0);
-                    log_message(GUL_NAME, shm->messages[i].content);
-                    message_id = shm->messages[i].message_id;
+                    
+                    // --- THIS IS THE FIX ---
+                    // Only process this message if the sender is NOT Jaineel
+                    if (strncmp(shm->messages[i].sender, JAINEEL_NAME, MAX_USERNAME_LEN) != 0) {
+                    
+                        display_message(GUL_NAME, shm->messages[i].content, GUL_COLOR, 0);
+                        log_message(GUL_NAME, shm->messages[i].content);
 
-                    if (is_exit_command(shm->messages[i].content)) {
-                        printf("%s%s has left the chat.%s\n",
-                               SYSTEM_COLOR, GUL_NAME, COLOR_RESET);
-                        log_system_event("Gul left the chat");
-                        sem_signal(semid, 0);
-                        goto cleanup;
+                        if (is_exit_command(shm->messages[i].content)) {
+                            printf("%s%s has left the chat.%s\n",
+                                   SYSTEM_COLOR, GUL_NAME, COLOR_RESET);
+                            log_system_event("Gul left the chat");
+                            sem_signal(semid, 0);
+                            goto cleanup;
+                        }
                     }
+                    
+                    // We update the message_id regardless of who sent it
+                    // to prevent re-reading it.
+                    message_id = shm->messages[i].message_id;
                 }
             }
         }
@@ -189,12 +196,10 @@ int main(void) {
                 shm->message_count++;
             }
 
-            // <-- NEW COMMENT BLOCK START -->
             /*
              * Signal the other process (semaphore 1) to notify it of a new message.
              * This assumes the other process is actively checking or waiting.
              */
-            // <-- NEW COMMENT BLOCK END -->
             sem_signal(semid, 1);
             sem_signal(semid, 0);
             break;
@@ -210,11 +215,7 @@ int main(void) {
 
             shm->messages[shm->message_count].type = MSG_TYPE_NORMAL;
             shm->messages[shm->message_count].message_id = ++shm->last_message_id;
-            
-            // --- THIS IS THE CORRECTED LINE ---
             shm->message_count++;
-            // --- END OF CORRECTION ---
-
         } else {
             printf("%sMessage queue full. Please wait...%s\n",
                    ERROR_COLOR, COLOR_RESET);
@@ -225,16 +226,13 @@ int main(void) {
 
         sem_signal(semid, 1);
         
-        // <-- NEW COMMENT BLOCK START -->
         /*
          * === CRITICAL SECTION END ===
          * Release the mutex lock (semaphore 0), allowing the other process
          * to enter its critical section.
          */
-        // <-- NEW COMMENT BLOCK END -->
         sem_signal(semid, 0);
     }
-
 cleanup:
     printf("%sCleaning up Jaineel...%s\n", SYSTEM_COLOR, COLOR_RESET);
     log_system_event("Jaineel process ending");
