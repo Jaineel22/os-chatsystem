@@ -108,8 +108,13 @@ void log_message(const char* user, const char* message) {
 
 // Check if message is an exit command
 int is_exit_command(const char* message) {
-    return (strcmp(message, "exit") == 0 || strcmp(message, "bye") == 0 || 
-            strcmp(message, "quit") == 0 || strcmp(message, "q") == 0);
+    char lower[MAX_MESSAGE_LEN];
+    strncpy(lower, message, MAX_MESSAGE_LEN);
+    for (int i = 0; lower[i]; i++) {
+        lower[i] = tolower(lower[i]);
+    }
+    return (strcmp(lower, "exit") == 0 || strcmp(lower, "bye") == 0 || 
+            strcmp(lower, "quit") == 0 || strcmp(lower, "q") == 0);
 }
 
 // Display welcome message
