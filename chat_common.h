@@ -80,6 +80,15 @@ void sem_signal(int semid, int semnum) {
 
 // Logging functions
 void log_message(const char* user, const char* message) {
+    // FIX: Check log file size and rotate if too large
+    struct stat st;
+    if (stat(LOG_FILE, &st) == 0 && st.st_size > 1024 * 1024) { // 1MB limit
+        char old_log[64];
+        snprintf(old_log, sizeof(old_log), "%s.old", LOG_FILE);
+        rename(LOG_FILE, old_log);
+        log_system_event("Log file rotated due to size limit");
+    }
+    
     FILE *log_file = fopen(LOG_FILE, "a");
     if (log_file == NULL) {
         perror("Failed to open log file");
@@ -94,24 +103,6 @@ void log_message(const char* user, const char* message) {
     strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", tm_info);
     
     fprintf(log_file, "[%s] %s: %s\n", timestamp, user, message);
-    fclose(log_file);
-}
-
-void log_system_event(const char* event) {
-    FILE *log_file = fopen(LOG_FILE, "a");
-    if (log_file == NULL) {
-        perror("Failed to open log file");
-        return;
-    }
-    
-    time_t now;
-    time(&now);
-    struct tm *tm_info = localtime(&now);
-    
-    char timestamp[64];
-    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", tm_info);
-    
-    fprintf(log_file, "[%s] SYSTEM: %s\n", timestamp, event);
     fclose(log_file);
 }
 
@@ -176,25 +167,3 @@ void check_existing_resources() {
 }
 
 // Cleanup function for shared memory and semaphores
-void cleanup_resources(int shmid, int semid) {
-    printf("\n%s%sCleaning up resources...%s\n", COLOR_BOLD, SYSTEM_COLOR, COLOR_RESET);
-    log_system_event("System cleanup initiated");
-    
-    // FIX: Proper shared memory detachment
-    if (shm != NULL && shmdt(shm) == -1) {
-        perror("shmdt failed");
-    }
-    
-    // Remove shared memory segment
-    if (shmctl(shmid, IPC_RMID, NULL) == -1) {
-        perror("shmctl IPC_RMID failed");
-    }
-    
-    // Remove semaphore set
-    if (semctl(semid, 0, IPC_RMID) == -1) {
-        perror("semctl IPC_RMID failed");
-    }
-    
-    printf("%sResources cleaned up.%s\n", SYSTEM_COLOR, COLOR_RESET);
-    log_system_event("System cleanup completed");
-}
