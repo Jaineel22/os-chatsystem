@@ -124,7 +124,7 @@ int is_exit_command(const char* message) {
 // Display welcome message
 void display_welcome(const char* username, const char* color) {
     printf("\n%s%s╔══════════════════════════════════════════════════════════════╗%s\n", COLOR_BOLD, color, COLOR_RESET);
-    printf("%s%s║                    CHAT SYSTEM v2.0                        ║%s\n", COLOR_BOLD, color, COLOR_RESET);
+    printf("%s%s║                    CHAT SYSTEM v%s                         ║%s\n", COLOR_BOLD, color, VERSION, COLOR_RESET);
     printf("%s%s║                                                              ║%s\n", COLOR_BOLD, color, COLOR_RESET);
     printf("%s%s║  Welcome %s%-20s%s!                                    ║%s\n", COLOR_BOLD, color, COLOR_WHITE, username, color, COLOR_RESET);
     printf("%s%s║                                                              ║%s\n", COLOR_BOLD, color, COLOR_RESET);
@@ -180,8 +180,8 @@ void cleanup_resources(int shmid, int semid) {
     printf("\n%s%sCleaning up resources...%s\n", COLOR_BOLD, SYSTEM_COLOR, COLOR_RESET);
     log_system_event("System cleanup initiated");
     
-    // Detach from shared memory
-    if (shmdt(NULL) == -1) {
+    // FIX: Proper shared memory detachment
+    if (shm != NULL && shmdt(shm) == -1) {
         perror("shmdt failed");
     }
     
