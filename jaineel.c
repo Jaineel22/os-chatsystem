@@ -133,7 +133,12 @@ int main(void) {
     int message_id = 0;
 
     while (1) {
-        /* Wait for write permission (no return value from custom sem_wait) */
+        // <-- NEW COMMENT BLOCK START -->
+        /* * === CRITICAL SECTION START ===
+         * Acquire the main mutex lock (semaphore 0).
+         * This ensures only one process can read/write to shared memory at a time.
+         */
+        // <-- NEW COMMENT BLOCK END -->
         sem_wait(semid, 0);
 
         /* Check new messages from Gul */
@@ -184,6 +189,12 @@ int main(void) {
                 shm->message_count++;
             }
 
+            // <-- NEW COMMENT BLOCK START -->
+            /*
+             * Signal the other process (semaphore 1) to notify it of a new message.
+             * This assumes the other process is actively checking or waiting.
+             */
+            // <-- NEW COMMENT BLOCK END -->
             sem_signal(semid, 1);
             sem_signal(semid, 0);
             break;
@@ -194,7 +205,7 @@ int main(void) {
             strncpy(shm->messages[shm->message_count].content, input, MAX_MESSAGE_LEN);
             shm->messages[shm->message_count].content[MAX_MESSAGE_LEN - 1] = '\0';
 
-            strncpy(shm->messages[shm->message_count].sender, JAINEEL_NAME, MAX_USERNAME_LEN);
+            strncpy(shm->messages[shm->messages[shm->message_count].sender, JAINEEL_NAME, MAX_USERNAME_LEN);
             shm->messages[shm->message_count].sender[MAX_USERNAME_LEN - 1] = '\0';
 
             shm->messages[shm->message_count].type = MSG_TYPE_NORMAL;
@@ -209,6 +220,14 @@ int main(void) {
         log_message(JAINEEL_NAME, input);
 
         sem_signal(semid, 1);
+        
+        // <-- NEW COMMENT BLOCK START -->
+        /*
+         * === CRITICAL SECTION END ===
+         * Release the mutex lock (semaphore 0), allowing the other process
+         * to enter its critical section.
+         */
+        // <-- NEW COMMENT BLOCK END -->
         sem_signal(semid, 0);
     }
 
