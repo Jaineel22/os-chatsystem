@@ -201,20 +201,21 @@ int main(void) {
         }
 
         /* Normal message */
-        /* Normal message */
         if (shm->message_count < 10) {
             strncpy(shm->messages[shm->message_count].content, input, MAX_MESSAGE_LEN);
             shm->messages[shm->message_count].content[MAX_MESSAGE_LEN - 1] = '\0';
 
-            // --- THIS IS THE CORRECTED LINE ---
             strncpy(shm->messages[shm->message_count].sender, JAINEEL_NAME, MAX_USERNAME_LEN);
             shm->messages[shm->message_count].sender[MAX_USERNAME_LEN - 1] = '\0';
-            // --- END OF CORRECTION ---
 
             shm->messages[shm->message_count].type = MSG_TYPE_NORMAL;
             shm->messages[shm->message_count].message_id = ++shm->last_message_id;
-            shm->messages[shm->message_count]++;
-        }else {
+            
+            // --- THIS IS THE CORRECTED LINE ---
+            shm->message_count++;
+            // --- END OF CORRECTION ---
+
+        } else {
             printf("%sMessage queue full. Please wait...%s\n",
                    ERROR_COLOR, COLOR_RESET);
         }
