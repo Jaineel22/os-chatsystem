@@ -5,9 +5,10 @@ struct shmseg *shm;
 
 // Signal handler for cleanup
 void signal_handler(int sig) {
-    printf("\n%sReceived signal %d, cleaning up...%s\n", ERROR_COLOR, sig, COLOR_RESET);
+    const char msg[] = "\nSignal received, cleaning up...\n";
+    write(STDOUT_FILENO, msg, sizeof(msg) - 1);
     cleanup_resources(shmid, semid);
-    exit(0);
+    _exit(0); // Use _exit instead of exit in signal handlers
 }
 
 int main() {
