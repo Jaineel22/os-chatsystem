@@ -49,6 +49,14 @@
 #define MSG_TYPE_SYSTEM 2
 
 typedef struct {
+    struct chat_message* messages;
+    size_t capacity;
+    size_t count;
+    size_t head;
+    size_t tail;
+} MessageBuffer;
+
+typedef struct {
     int shmid;
     int semid;
     struct shmseg* shm;
@@ -235,3 +243,53 @@ void setup_unicode(void) {
     }
 }
 
+
+//Create a new message buffer with specified capacity
+MessageBuffer* buffer_create(size_t capacity) {
+    MessageBuffer* buffer = malloc(sizeof(MessageBuffer));
+    if (!buffer) return NULL;
+    
+    buffer->messages = malloc(sizeof(struct chat_message) * capacity);
+    if (!buffer->messages) {
+        free(buffer);
+        return NULL;
+    }
+    
+    buffer->capacity = capacity;
+    buffer->count = 0;
+    buffer->head = 0;
+    buffer->tail = 0;
+    return buffer;
+}
+
+//Destroy message buffer and free all resources
+void buffer_destroy(MessageBuffer* buffer) {
+    if (buffer) {
+        free(buffer->messages);
+        free(buffer);
+    }
+}
+
+//Push a message to the buffer (circular)
+int buffer_push(MessageBuffer* buffer, const struct chat_message* msg) {
+    if (!buffer || !msg || buffer->count >= buffer->capacity) {
+        return 0; // Failure
+    }
+    
+    buffer->messages[buffer->tail] = *msg;
+    buffer->tail = (buffer->tail + 1) % buffer->capacity;
+    buffer->count++;
+    return 1; // Success
+}
+
+//Pop a message from the buffer (circular)
+int buffer_pop(MessageBuffer* buffer, struct chat_message* msg) {
+    if (!buffer || !msg || buffer->count == 0) {
+        return 0; // Failure
+    }
+    
+    *msg = buffer->messages[buffer->head];
+    buffer->head = (buffer->head + 1) % buffer->capacity;
+    buffer->count--;
+    return 1; // Success
+}
