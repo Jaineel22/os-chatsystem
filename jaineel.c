@@ -132,7 +132,7 @@ int main(void) {
     char input[MAX_MESSAGE_LEN];
     int message_id = 0;
 
-while (1) {
+    while (1) {
         /* * === CRITICAL SECTION START ===
          * Acquire the main mutex lock (semaphore 0).
          * This ensures only one process can read/write to shared memory at a time.
@@ -144,7 +144,6 @@ while (1) {
             for (int i = 0; i < shm->message_count; i++) {
                 if (shm->messages[i].message_id > message_id) {
                     
-                    // --- THIS IS THE FIX ---
                     // Only process this message if the sender is NOT Jaineel
                     if (strncmp(shm->messages[i].sender, JAINEEL_NAME, MAX_USERNAME_LEN) != 0) {
                     
@@ -178,6 +177,14 @@ while (1) {
         }
 
         input[strcspn(input, "\n")] = '\0';
+        
+        // --- NEW CHANGE START ---
+        /* Check for empty input (user just pressed Enter) */
+        if (input[0] == '\0') {
+            sem_signal(semid, 0); // Release the lock
+            continue; // Go to the next loop iteration without sending
+        }
+        // --- NEW CHANGE END ---
 
         /* Exit command */
         if (is_exit_command(input)) {
@@ -233,6 +240,7 @@ while (1) {
          */
         sem_signal(semid, 0);
     }
+
 cleanup:
     printf("%sCleaning up Jaineel...%s\n", SYSTEM_COLOR, COLOR_RESET);
     log_system_event("Jaineel process ending");
