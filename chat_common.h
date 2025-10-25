@@ -13,7 +13,9 @@
 
 #define SHM_KEY 1234
 #define SEM_KEY 5678
+#ifndef MAX_MESSAGE_LEN
 #define MAX_MESSAGE_LEN 200
+#endif
 #define LOG_FILE "chat_history.log"
 #define MAX_USERNAME_LEN 20
 
