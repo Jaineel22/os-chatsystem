@@ -29,17 +29,6 @@ void signal_handler(int sig) {
         cleanup_resources(shmid, semid);
     }
     
-    // --- START OF REMOVED BLOCK ---
-    /*
-    else if (shm != NULL && shm != (void *)-1) {
-        shmdt(shm);
-        shm = NULL;
-    }
-    */
-    // This block was redundant. If shm was valid, shmid was also valid,
-    // so the main if(shmid..._ was true and this was never reached.
-    // --- END OF REMOVED BLOCK ---
-
     exit(0);
 }
 
@@ -72,6 +61,11 @@ int main(void) {
     shm = (struct shmseg *)shmat(shmid, NULL, 0);
     if (shm == (void *)-1) {
         perror("shmat failed");
+        
+        // --- NEW CHANGE START ---
+        printf("%sFailed to attach to shared memory ID: %d%s\n", ERROR_COLOR, shmid, COLOR_RESET);
+        // --- NEW CHANGE END ---
+        
         shmid = -1;
         return 1;
     }
@@ -265,14 +259,5 @@ cleanup:
         cleanup_resources(shmid, semid);
     }
     
-    // --- START OF REMOVED BLOCK ---
-    /*
-    else if (shm != NULL && shm != (void *)-1) {
-        shmdt(shm);
-    }
-    */
-    // This logic is also redundant for the same reason as in the signal handler.
-    // --- END OF REMOLED BLOCK ---
-
     return 0;
 }
