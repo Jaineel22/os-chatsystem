@@ -23,12 +23,22 @@ struct shmseg *shm = NULL;
 void signal_handler(int sig) {
     printf("\n%sReceived signal %d, cleaning up...%s\n", ERROR_COLOR, sig, COLOR_RESET);
 
+    // Call cleanup_resources if we have any valid IPC IDs.
+    // The function itself (in chat_common.c) should handle detaching shm.
     if (shmid != -1 || semid != -1) {
         cleanup_resources(shmid, semid);
-    } else if (shm != NULL && shm != (void *)-1) {
+    }
+    
+    // --- START OF REMOVED BLOCK ---
+    /*
+    else if (shm != NULL && shm != (void *)-1) {
         shmdt(shm);
         shm = NULL;
     }
+    */
+    // This block was redundant. If shm was valid, shmid was also valid,
+    // so the main if(shmid..._ was true and this was never reached.
+    // --- END OF REMOVED BLOCK ---
 
     exit(0);
 }
@@ -166,7 +176,6 @@ int main(void) {
             }
         }
 
-        // --- NEW CHANGE START ---
         /* Check if message queue is full before asking for input */
         if (shm->message_count >= 10) {
             printf("%sMessage queue is full. Waiting for other user to read messages...%s\n", ERROR_COLOR, COLOR_RESET);
@@ -174,7 +183,6 @@ int main(void) {
             sleep(1);             // Wait 1 second to prevent busy-looping
             continue;             // Go to the start of the while loop
         }
-        // --- NEW CHANGE END ---
 
         /* Get input */
         printf("%s%s > %s", JAINEEL_COLOR, JAINEEL_NAME, COLOR_RESET);
@@ -255,9 +263,16 @@ cleanup:
 
     if (shmid != -1 || semid != -1) {
         cleanup_resources(shmid, semid);
-    } else if (shm != NULL && shm != (void *)-1) {
+    }
+    
+    // --- START OF REMOVED BLOCK ---
+    /*
+    else if (shm != NULL && shm != (void *)-1) {
         shmdt(shm);
     }
+    */
+    // This logic is also redundant for the same reason as in the signal handler.
+    // --- END OF REMOLED BLOCK ---
 
     return 0;
 }
