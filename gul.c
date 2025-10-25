@@ -15,7 +15,7 @@ int main() {
     // Set up signal handlers for graceful cleanup
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
-    
+    setup_unicode();
     
     display_welcome(GUL_NAME, GUL_COLOR);
      printf("%sWelcome to the OS Chat System!%s\n", SYSTEM_COLOR, COLOR_RESET); // <-- THIS IS THE NEW LINE

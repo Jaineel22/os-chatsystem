@@ -36,6 +36,7 @@ int main(void) {
     /* Handle interrupt signals */
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
+    setup_unicode();
 
     display_welcome(JAINEEL_NAME, JAINEEL_COLOR);
     printf("%sWelcome to the OS Chat System!%s\n", SYSTEM_COLOR, COLOR_RESET);

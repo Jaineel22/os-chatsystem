@@ -10,6 +10,8 @@
 #include <signal.h>
 #include <time.h>
 #include <sys/stat.h>
+#include <wchar.h>        
+#include <locale.h>  
 
 #define SHM_KEY 1234
 #define SEM_KEY 5678
@@ -193,3 +195,13 @@ void clear_processed_messages(struct shmseg* shm, int up_to_id) {
     shm->message_count = write_index;
 }
 
+//brief Initialize Unicode and locale support for international text
+ 
+void setup_unicode(void) {
+    if (setlocale(LC_ALL, "en_US.UTF-8") == NULL) {
+        // Fallback if UTF-8 locale is not available
+        setlocale(LC_ALL, "C");
+        printf("%sWarning: UTF-8 locale not available, using basic locale%s\n", 
+               COLOR_YELLOW, COLOR_RESET);
+    }
+}
