@@ -166,6 +166,16 @@ int main(void) {
             }
         }
 
+        // --- NEW CHANGE START ---
+        /* Check if message queue is full before asking for input */
+        if (shm->message_count >= 10) {
+            printf("%sMessage queue is full. Waiting for other user to read messages...%s\n", ERROR_COLOR, COLOR_RESET);
+            sem_signal(semid, 0); // Release the lock
+            sleep(1);             // Wait 1 second to prevent busy-looping
+            continue;             // Go to the start of the while loop
+        }
+        // --- NEW CHANGE END ---
+
         /* Get input */
         printf("%s%s > %s", JAINEEL_COLOR, JAINEEL_NAME, COLOR_RESET);
         fflush(stdout);
@@ -178,14 +188,12 @@ int main(void) {
 
         input[strcspn(input, "\n")] = '\0';
         
-        // --- NEW CHANGE START ---
         /* Check for empty input (user just pressed Enter) */
         if (input[0] == '\0') {
             sem_signal(semid, 0); // Release the lock
             continue; // Go to the next loop iteration without sending
         }
-        // --- NEW CHANGE END ---
-
+        
         /* Exit command */
         if (is_exit_command(input)) {
             printf("%sYou are leaving the chat...%s\n", SYSTEM_COLOR, COLOR_RESET);
