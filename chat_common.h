@@ -1,5 +1,6 @@
 #define _DEFAULT_SOURCE
 #define VERSION "2.1"
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,9 +13,6 @@
 #include <sys/stat.h>
 #include <wchar.h>        
 #include <locale.h>  
-
-#define SHM_KEY 1234
-#define SEM_KEY 5678
 #ifndef MAX_MESSAGE_LEN
 #define MAX_MESSAGE_LEN 200
 #endif
