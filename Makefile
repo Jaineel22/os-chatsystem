@@ -52,6 +52,7 @@ help:
 	@echo "  distclean    - Clean everything"
 	@echo "  run-jaineel  - Compile and run jaineel"
 	@echo "  run-gul      - Compile and run gul"
+	@echo "  analyze      - Run static code analysis"
 	@echo "  help         - Show this help message"
 	@echo ""
 	@echo "Usage:"
@@ -62,4 +63,10 @@ help:
 	@echo ""
 	@echo "Note: Either user can start first - the system will wait for both to connect."
 
-.PHONY: all clean clean-resources distclean run-jaineel run-gul help
+analyze:
+	@which scan-build >/dev/null 2>&1 || echo "Warning: scan-build not installed"
+	@which cppcheck >/dev/null 2>&1 || echo "Warning: cppcheck not installed"
+	scan-build make all
+	cppcheck --enable=all *.c *.h
+
+.PHONY: all clean clean-resources distclean run-jaineel run-gul help analyze
