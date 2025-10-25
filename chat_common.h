@@ -171,4 +171,13 @@ void check_existing_resources() {
     }
 }
 
-// Cleanup function for shared memory and semaphores
+void sanitize_input(char* input) {
+    // Remove control characters
+    for (int i = 0; input[i]; i++) {
+        if (input[i] < 32 && input[i] != '\n' && input[i] != '\t') {
+            input[i] = ' ';
+        }
+    }
+}
+
+
