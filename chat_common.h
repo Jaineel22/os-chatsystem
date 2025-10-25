@@ -182,4 +182,14 @@ void sanitize_input(char* input) {
     }
 }
 
+// Add function to clear processed messages
+void clear_processed_messages(struct shmseg* shm, int up_to_id) {
+    int write_index = 0;
+    for (int i = 0; i < shm->message_count; i++) {
+        if (shm->messages[i].message_id > up_to_id) {
+            shm->messages[write_index++] = shm->messages[i];
+        }
+    }
+    shm->message_count = write_index;
+}
 
