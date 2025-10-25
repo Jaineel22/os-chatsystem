@@ -61,11 +61,7 @@ int main(void) {
     shm = (struct shmseg *)shmat(shmid, NULL, 0);
     if (shm == (void *)-1) {
         perror("shmat failed");
-        
-        // --- NEW CHANGE START ---
         printf("%sFailed to attach to shared memory ID: %d%s\n", ERROR_COLOR, shmid, COLOR_RESET);
-        // --- NEW CHANGE END ---
-        
         shmid = -1;
         return 1;
     }
@@ -94,6 +90,9 @@ int main(void) {
             semid = semget(SEM_KEY, 3, IPC_CREAT | 0666);
             if (semid == -1) {
                 perror("semget (existing) failed");
+                // --- NEW CHANGE START (BLOCK 1) ---
+                printf("%sFailed to get existing semaphore with key: %d%s\n", ERROR_COLOR, SEM_KEY, COLOR_RESET);
+                // --- NEW CHANGE END (BLOCK 1) ---
                 shmdt(shm);
                 shm = NULL;
                 return 1;
@@ -102,6 +101,9 @@ int main(void) {
                    SUCCESS_COLOR, semid, COLOR_RESET);
         } else {
             perror("semget failed");
+            // --- NEW CHANGE START (BLOCK 2) ---
+            printf("%sFailed to create new semaphore with key: %d%s\n", ERROR_COLOR, SEM_KEY, COLOR_RESET);
+            // --- NEW CHANGE END (BLOCK 2) ---
             shmdt(shm);
             shm = NULL;
             return 1;
