@@ -2,6 +2,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -g
 LDFLAGS = 
 
+
 # Target executables
 TARGETS = jaineel gul
 

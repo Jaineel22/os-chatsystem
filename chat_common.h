@@ -48,6 +48,15 @@
 #define MSG_TYPE_EXIT   1
 #define MSG_TYPE_SYSTEM 2
 
+typedef struct {
+    int shmid;
+    int semid;
+    struct shmseg* shm;
+    const char* username;
+    const char* color;
+    int last_seen_id;
+} ChatSession;
+
 struct chat_message {
     char content[MAX_MESSAGE_LEN];
     char sender[MAX_USERNAME_LEN];
@@ -193,6 +202,28 @@ void clear_processed_messages(struct shmseg* shm, int up_to_id) {
     shm->message_count = write_index;
 }
 
+// Initialize chat session with user identity and default state
+void chat_session_init(ChatSession* session, const char* username, const char* color) {
+    memset(session, 0, sizeof(ChatSession));
+    session->username = username;
+    session->color = color;
+    session->last_seen_id = 0;
+    session->shmid = -1;
+    session->semid = -1;
+    session->shm = NULL;
+}
+
+//Clean up session resources: detach shared memory and reset state
+void chat_session_cleanup(ChatSession* session) {
+    if (session->shm != NULL) {
+        shmdt(session->shm);
+        session->shm = NULL;
+    }
+    // Note: IPC removal is handled by cleanup_resources
+    session->shmid = -1;
+    session->semid = -1;
+}
+
 //brief Initialize Unicode and locale support for international text
  
 void setup_unicode(void) {
@@ -203,3 +234,4 @@ void setup_unicode(void) {
                COLOR_YELLOW, COLOR_RESET);
     }
 }
+
