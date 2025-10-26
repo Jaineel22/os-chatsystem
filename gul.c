@@ -1,5 +1,9 @@
 #include "chat_common.h"
 
+#define HISTORY_SIZE 5
+static char input_history[HISTORY_SIZE][MAX_MESSAGE_LEN];
+static int history_index = 0;
+
 int shmid, semid;
 struct shmseg *shm;
 
@@ -136,6 +140,12 @@ int main() {
             shm->message_count++;
         }
         
+        if (history_index < HISTORY_SIZE) {
+    strncpy(input_history[history_index++], input, MAX_MESSAGE_LEN);
+}
+
+display_message(GUL_NAME, input, GUL_COLOR, 1);
+log_message(GUL_NAME, input);
         display_message(GUL_NAME, input, GUL_COLOR, 1);
         log_message(GUL_NAME, input);
         
@@ -149,4 +159,11 @@ cleanup:
     shmdt(shm);
     
     return 0;
+}
+
+void show_message_history() {
+    printf("%sRecent messages you sent:%s\n", INFO_COLOR, COLOR_RESET);
+    for (int i = 0; i < history_index; i++) {
+        printf("  %s%d. %s%s\n", COLOR_DIM, i+1, input_history[i], COLOR_RESET);
+    }
 }
