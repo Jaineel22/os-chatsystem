@@ -130,6 +130,14 @@ int main() {
             sem_signal(semid, 0); // Signal Jaineel to read
             break;
         }
+
+        //buffer full check:
+        if (shm->message_count >= 10) {
+         printf("%s⚠ Message buffer full! Waiting for space...%s\n", ERROR_COLOR, COLOR_RESET);
+         sem_signal(semid, 0);
+         sleep(2); // Wait 2 seconds before retrying
+         continue;
+         }
         
         // Send message to Jaineel
         if (shm->message_count < 10) {
@@ -140,6 +148,7 @@ int main() {
             shm->message_count++;
         }
         
+        //store message in history
         if (history_index < HISTORY_SIZE) {
     strncpy(input_history[history_index++], input, MAX_MESSAGE_LEN);
 }
