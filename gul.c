@@ -94,6 +94,20 @@ int main() {
         
         // Remove newline
         input[strcspn(input, "\n")] = 0;
+
+        // add input validation
+        if (strlen(input) == 0) {
+                  printf("%sEmpty message ignored%s\n", COLOR_DIM, COLOR_RESET);
+                  sem_signal(semid, 0);
+                  continue;
+        }
+
+      // add length validation
+        if (strlen(input) >= MAX_MESSAGE_LEN - 1) {
+                    printf("%sMessage too long! Please shorten your message.%s\n", ERROR_COLOR, COLOR_RESET);
+                    sem_signal(semid, 0);
+                    continue;
+        }
         
         // Check for exit command
         if (is_exit_command(input)) {
