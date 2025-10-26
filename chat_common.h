@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <ctype.h>
 #include <sys/sem.h>
 #include <unistd.h>
 #include <signal.h>
