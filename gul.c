@@ -1,9 +1,5 @@
 #include "chat_common.h"
 #include "config.h"
-<<<<<<< HEAD
-
-=======
->>>>>>> bd5385d5e562e15b4c0b88667983ce628b9f7bad
 #define HISTORY_SIZE 5
 static char input_history[HISTORY_SIZE][MAX_MESSAGE_LEN];
 static int history_index = 0;
