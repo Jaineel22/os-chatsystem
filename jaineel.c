@@ -32,6 +32,7 @@ void signal_handler(int sig) {
     exit(0);
 }
 
+<<<<<<< HEAD
 void log_system_event(const char *message) {
     FILE *log_file = fopen("system.log", "a");
     if (log_file) {
@@ -49,6 +50,9 @@ void cleanup_resources(int shmid, int semid) {
         semctl(semid, 0, IPC_RMID);
     }
 }
+=======
+
+>>>>>>> bd5385d5e562e15b4c0b88667983ce628b9f7bad
 
 int main(void) {
     /* Handle interrupt signals */
