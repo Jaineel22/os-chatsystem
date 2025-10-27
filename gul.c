@@ -4,6 +4,10 @@
 static char input_history[HISTORY_SIZE][MAX_MESSAGE_LEN];
 static int history_index = 0;
 
+// Function declarations
+void show_message_history(void);
+void cleanup_resources(int shmid, int semid);
+
 int shmid, semid;
 struct shmseg *shm;
 
@@ -12,21 +16,30 @@ void signal_handler(int sig) {
     const char msg[] = "\nSignal received, cleaning up...\n";
     write(STDOUT_FILENO, msg, sizeof(msg) - 1);
     cleanup_resources(shmid, semid);
-    _exit(0); // Use _exit instead of exit in signal handlers
+    _exit(0);
+}
+
+// Add cleanup_resources if not in chat_common.h
+void cleanup_resources(int shmid, int semid) {
+    if (shmid != -1) {
+        shmctl(shmid, IPC_RMID, NULL);
+    }
+    if (semid != -1) {
+        semctl(semid, 0, IPC_RMID);
+    }
 }
 
 int main() {
-    // Set up signal handlers for graceful cleanup
+    // Set up signal handlers
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
     setup_unicode();
     
     display_welcome(GUL_NAME, GUL_COLOR);
-     printf("%sWelcome to the OS Chat System!%s\n", SYSTEM_COLOR, COLOR_RESET); // <-- THIS IS THE NEW LINE
-     printf("%sCompiled on: %s at %s%s\n", COLOR_DIM, __DATE__, __TIME__, COLOR_RESET); // <-- ADDED THIS LINE
+    printf("%sWelcome to the OS Chat System!%s\n", SYSTEM_COLOR, COLOR_RESET);
+    printf("%sCompiled on: %s at %s%s\n", COLOR_DIM, __DATE__, __TIME__, COLOR_RESET);
     log_system_event("Gul process started");
 
-    
     // Get existing shared memory segment
     shmid = shmget(SHM_KEY, sizeof(struct shmseg), 0666);
     if (shmid == -1) {
@@ -65,8 +78,8 @@ int main() {
     int message_id = 0;
     
     while (1) {
-        // Wait for read permission
-        sem_wait(semid, 1);
+        // FIXED: Acquire write lock before reading shared memory
+        sem_wait(semid, 0);
         
         // Check if there are new messages from Jaineel
         if (shm->message_count > 0) {
@@ -87,6 +100,17 @@ int main() {
             }
         }
         
+        // Buffer full check should be here, before getting input
+        if (shm->message_count >= 10) {
+            printf("%sMessage buffer full! Waiting for space...%s\n", ERROR_COLOR, COLOR_RESET);
+            sem_signal(semid, 0);
+            sleep(2);
+            continue;
+        }
+        
+        // Release lock before getting user input (to avoid blocking)
+        sem_signal(semid, 0);
+        
         // Get input from Gul
         printf("%s%s: %s", GUL_COLOR, GUL_NAME, COLOR_RESET);
         fflush(stdout);
@@ -99,18 +123,16 @@ int main() {
         // Remove newline
         input[strcspn(input, "\n")] = 0;
 
-        // add input validation
+        // Input validation
         if (strlen(input) == 0) {
-                  printf("%sEmpty message ignored%s\n", COLOR_DIM, COLOR_RESET);
-                  sem_signal(semid, 0);
-                  continue;
+            printf("%sEmpty message ignored%s\n", COLOR_DIM, COLOR_RESET);
+            continue;
         }
 
-      // add length validation
+        // Length validation
         if (strlen(input) >= MAX_MESSAGE_LEN - 1) {
-                    printf("%sMessage too long! Please shorten your message.%s\n", ERROR_COLOR, COLOR_RESET);
-                    sem_signal(semid, 0);
-                    continue;
+            printf("%sMessage too long! Please shorten your message.%s\n", ERROR_COLOR, COLOR_RESET);
+            continue;
         }
         
         // Check for exit command
@@ -118,47 +140,54 @@ int main() {
             printf("%sYou are leaving the chat...%s\n", SYSTEM_COLOR, COLOR_RESET);
             log_system_event("Gul initiated exit");
             
+            // Re-acquire lock for shared memory access
+            sem_wait(semid, 0);
+            
             // Send exit message to Jaineel
             if (shm->message_count < 10) {
-                strcpy(shm->messages[shm->message_count].content, input);
-                strcpy(shm->messages[shm->message_count].sender, GUL_NAME);
+                strncpy(shm->messages[shm->message_count].content, input, MAX_MESSAGE_LEN-1);
+                strncpy(shm->messages[shm->message_count].sender, GUL_NAME, MAX_USERNAME_LEN-1);
                 shm->messages[shm->message_count].type = MSG_TYPE_EXIT;
                 shm->messages[shm->message_count].message_id = ++shm->last_message_id;
                 shm->message_count++;
             }
             
-            sem_signal(semid, 0); // Signal Jaineel to read
+            sem_signal(semid, 0);
+            sem_signal(semid, 1); // Signal Jaineel to read
             break;
         }
 
-        //buffer full check:
-        if (shm->message_count >= 10) {
-         printf("%s⚠ Message buffer full! Waiting for space...%s\n", ERROR_COLOR, COLOR_RESET);
-         sem_signal(semid, 0);
-         sleep(2); // Wait 2 seconds before retrying
-         continue;
-         }
+        // Re-acquire lock for sending message
+        sem_wait(semid, 0);
         
-        // Send message to Jaineel
-        if (shm->message_count < 10) {
-            strcpy(shm->messages[shm->message_count].content, input);
-            strcpy(shm->messages[shm->message_count].sender, GUL_NAME);
-            shm->messages[shm->message_count].type = MSG_TYPE_NORMAL;
-            shm->messages[shm->message_count].message_id = ++shm->last_message_id;
-            shm->message_count++;
+        // Buffer check again (situation might have changed)
+        if (shm->message_count >= 10) {
+            printf("%sMessage buffer full! Waiting for space...%s\n", ERROR_COLOR, COLOR_RESET);
+            sem_signal(semid, 0);
+            sleep(2);
+            continue;
         }
         
-        //store message in history
+        // Send message to Jaineel
+        strncpy(shm->messages[shm->message_count].content, input, MAX_MESSAGE_LEN-1);
+        strncpy(shm->messages[shm->message_count].sender, GUL_NAME, MAX_USERNAME_LEN-1);
+        shm->messages[shm->message_count].type = MSG_TYPE_NORMAL;
+        shm->messages[shm->message_count].message_id = ++shm->last_message_id;
+        shm->message_count++;
+        
+        // Store message in history
         if (history_index < HISTORY_SIZE) {
-    strncpy(input_history[history_index++], input, MAX_MESSAGE_LEN);
-}
+            strncpy(input_history[history_index], input, MAX_MESSAGE_LEN-1);
+            input_history[history_index][MAX_MESSAGE_LEN-1] = '\0';
+            history_index++;
+        }
 
-display_message(GUL_NAME, input, GUL_COLOR, 1);
-log_message(GUL_NAME, input);
+        // FIXED: Remove duplicates - display only once
         display_message(GUL_NAME, input, GUL_COLOR, 1);
         log_message(GUL_NAME, input);
         
-        // Signal Jaineel to read
+        // Signal Jaineel to read and release lock
+        sem_signal(semid, 1);
         sem_signal(semid, 0);
     }
     
